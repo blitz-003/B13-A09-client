@@ -31,7 +31,7 @@ export default function RootLayout({ children }) {
           <Navbar />
           <main className="flex-1 flex flex-col w-full">{children}</main>
           <Footer />
-          <Toaster position="bottom-right" richColors />
+          <Toaster position="top-center" richColors />
         </ThemeProvider>
       </body>
     </html>
