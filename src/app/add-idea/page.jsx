@@ -81,6 +81,7 @@ export default function AddIdeaForm() {
   const [estimatedBudget, setEstimatedBudget] = React.useState("");
   const [problem, setProblem] = React.useState("");
   const [solution, setSolution] = React.useState("");
+  const [image, setImage] = React.useState(""); // <-- Track Image URL asset string
 
   const handleFormSubmission = async (e) => {
     e.preventDefault();
@@ -106,23 +107,23 @@ export default function AddIdeaForm() {
 
       // 2. Fetch the secure JWT token from your auth client
       const { data: tokenData } = await authClient.token();
-      
+
       if (!tokenData?.token) {
         toast.error("Authentication session missing. Please log back in.");
         setIsSubmitting(false);
         return;
       }
-      
-      // 3. Construct the payload matching your backend's expected req.body keys
+
+      // 3. Construct payload matching your backend expectations
       const ideaData = {
         title,
         category,
         shortDescription,
         targetAudience,
-        estimatedBudget: estimatedBudget || "N/A", // Fallback text if optional field is empty
+        estimatedBudget: estimatedBudget || "N/A",
         problem,
         solution,
-        
+        image: image.trim(), // <-- Append image variable clean of structural spaces
       };
 
       // 4. Dispatch the actual network request
@@ -130,7 +131,7 @@ export default function AddIdeaForm() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${tokenData.token}`, // Send bearer token to pass verifyToken
+          Authorization: `Bearer ${tokenData.token}`,
         },
         body: JSON.stringify(ideaData),
       });
@@ -149,7 +150,7 @@ export default function AddIdeaForm() {
       // 6. Execution successful
       toast.success("Concept successfully queued for tracking!");
       router.push("/ideas");
-      router.refresh(); // Clear the route cache to show the fresh list instantly
+      router.refresh();
     } catch (err) {
       console.error("Submission Pipeline Interruption:", err);
       toast.error(
@@ -204,6 +205,7 @@ export default function AddIdeaForm() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
+                    type="button"
                     variant="outline"
                     className="h-10 border-zinc-200 bg-background text-zinc-700 dark:border-zinc-800 dark:text-zinc-300 justify-between text-xs font-medium w-full"
                   >
@@ -246,6 +248,25 @@ export default function AddIdeaForm() {
               value={shortDescription}
               onChange={(e) => setShortDescription(e.target.value)}
               maxLength={120}
+            />
+          </div>
+
+          {/* --- NEW OPTIONAL IMAGE URL FIELD --- */}
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-1">
+              <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                Concept Cover Image URL
+              </label>
+              <span className="text-[10px] text-zinc-400 font-medium">
+                (Optional)
+              </span>
+            </div>
+            <Input
+              type="url"
+              placeholder="e.g., https://images.unsplash.com/photo-... or custom storage CDN link"
+              className="h-10 border-zinc-200 bg-background dark:border-zinc-800 text-sm"
+              value={image}
+              onChange={(e) => setImage(e.target.value)}
             />
           </div>
         </div>

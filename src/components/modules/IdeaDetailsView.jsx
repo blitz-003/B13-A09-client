@@ -69,7 +69,7 @@ export default function IdeaDetailsView({
   const BACKEND_URL =
     process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
 
-  // General App State Lookups
+  // State Management
   const [comments, setComments] = React.useState(fetchedIdea?.comments || []);
   const [newCommentText, setNewCommentText] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -154,7 +154,6 @@ export default function IdeaDetailsView({
       if (!res.ok)
         throw new Error(data.error || "Failed to update comment parameters.");
 
-      // Sync Client View States
       setComments(
         comments.map((c) =>
           c.id === commentId ? { ...c, text: data.text } : c,
@@ -217,15 +216,32 @@ export default function IdeaDetailsView({
         <ArrowLeftIcon /> Back to Feed
       </button>
 
-      {/* IDEA METADATA PANEL */}
+      {/* CONDITIONAL COVER PHOTO FRAME — ONLY RENDERS IF AN IMAGE URL EXISTS */}
+      {fetchedIdea.image && (
+        <div className="w-full h-[240px] sm:h-[340px] rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 shadow-sm relative">
+          <img
+            src={fetchedIdea.image}
+            alt={`${fetchedIdea.title} implementation diagram`}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src =
+                "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200";
+            }}
+          />
+        </div>
+      )}
+
+      {/* CORE IDEA PROFILE META WRAPPER */}
       <div className="p-6 rounded-xl border border-zinc-200 bg-card dark:border-zinc-800 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <span className="px-2.5 py-0.5 rounded-md bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400 font-medium text-[10px] uppercase tracking-wider">
-            {fetchedIdea.category || "General Tech"}
-          </span>
-          <span className="text-[10px] text-zinc-400 font-mono font-medium">
-            DB_ID: {fetchedIdea._id}
-          </span>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-md bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400 font-medium text-[10px] uppercase tracking-wider">
+              {fetchedIdea.category || "General Tech"}
+            </span>
+            <span className="text-[10px] text-zinc-400 font-mono">
+              DB_ID: {fetchedIdea._id}
+            </span>
+          </div>
         </div>
 
         <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -330,7 +346,6 @@ export default function IdeaDetailsView({
                 )}
               </div>
 
-              {/* INLINE EDIT CONDITIONAL VIEW BRANCH */}
               {editingCommentId === comment.id ? (
                 <div className="flex flex-col gap-2 mt-1">
                   <Input
@@ -367,7 +382,7 @@ export default function IdeaDetailsView({
         </div>
       </div>
 
-      {/* --- FLOATING OVERLAY DIALOGUE DIALOG FOR DELETION --- */}
+      {/* FLOATING OVERLAY MODAL FOR DELETION */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-zinc-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="w-full max-w-sm p-6 rounded-xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-950 flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-150">
