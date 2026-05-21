@@ -216,9 +216,9 @@ export default function IdeaDetailsView({
         <ArrowLeftIcon /> Back to Feed
       </button>
 
-      {/* CONDITIONAL COVER PHOTO FRAME — ONLY RENDERS IF AN IMAGE URL EXISTS */}
-      {fetchedIdea.image && (
-        <div className="w-full h-[240px] sm:h-[340px] rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 shadow-sm relative">
+      {/* INTERACTIVE ACCENT COVER PHOTO CARD FRAME */}
+      <div className="w-full h-[240px] sm:h-[340px] rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 shadow-sm relative">
+        {fetchedIdea.image ? (
           <img
             src={fetchedIdea.image}
             alt={`${fetchedIdea.title} implementation diagram`}
@@ -228,8 +228,28 @@ export default function IdeaDetailsView({
                 "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200";
             }}
           />
-        </div>
-      )}
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-600 gap-1.5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-7 h-7"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 0 11-.75 0 .375 0 01.75 0z"
+              />
+            </svg>
+            <span className="text-[10px] uppercase font-mono tracking-wider">
+              No Concept Cover Asset Uploaded
+            </span>
+          </div>
+        )}
+      </div>
 
       {/* CORE IDEA PROFILE META WRAPPER */}
       <div className="p-6 rounded-xl border border-zinc-200 bg-card dark:border-zinc-800 flex flex-col gap-4">

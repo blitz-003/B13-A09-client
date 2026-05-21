@@ -1,37 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Idea Validation Engine - Frontend
 
-## Getting Started
+An interactive, responsive client portal built with Next.js 14+ to crowdsource, review, and visually map product and technical concepts. This interface empowers engineering and product teams to submit concept theses, target specific consumer segments, map budget estimates, and collect rigorous architectural criticism through an analytical feedback corridor.
 
-First, run the development server:
+## 🚀 Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Concept Portfolio View:** A structured index mapping active ideas, implementation categories, target segments, and cost estimations.
+- **Validation Feedback Stream:** Real-time thread corridor for inline critique with fully integrated, secure CRUD operations for comment entries.
+- **Persistent Authentication:** State management and secure session orchestration handled via `authClient` integration.
+- **Adaptive Dark Mode & Responsive Layout:** Crafted using Tailwind CSS, featuring optimized custom SVG asset micro-interactions.
+
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js (App Router, Client Component architecture)
+- **Styling:** Tailwind CSS / Shadcn UI primitives (`Input`, `Button`, `Textarea`)
+- **State & Network Layer:** Native Fetch API with asynchronous state tracking hooks
+- **Toasts & Notifications:** `sonner`
+
+---
+
+## ⚙️ Environment Variables Configuration
+
+Before launching the local client, create a `.env.local` file in the root directory of your frontend workspace to establish communication with the cloud or local service backend.
+
+```env
+# URL pointer to the active backend orchestration server
+NEXT_PUBLIC_SERVER_URL=http://localhost:5000
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-"# B13-A09-client" 
