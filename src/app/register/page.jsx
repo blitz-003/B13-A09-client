@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 // Clean, single-line vector graphics utilizing custom orange brand mapping
 const UserPlusIcon = () => (
@@ -54,7 +55,7 @@ const ImageIcon = () => (
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
-      d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375’ .375 0 11-.75 0 .375 .375 0 01.75 0z"
+      d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 .375 0 11-.75 0 .375 .375 0 01.75 0z"
     />
   </svg>
 );
@@ -93,11 +94,27 @@ const KeyIcon = () => (
   </svg>
 );
 
+const GoogleIcon = () => (
+  <svg
+    className="mr-2 h-4 w-4 shrink-0"
+    aria-hidden="true"
+    focusable="false"
+    role="img"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 488 512"
+  >
+    <path
+      fill="currentColor"
+      d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
+    />
+  </svg>
+);
+
 export default function SignupPortal() {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = React.useState(false);
 
-  // Registration data matrix hooks
+  // Controlled UI hooks
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [photoUrl, setPhotoUrl] = React.useState("");
@@ -115,12 +132,12 @@ export default function SignupPortal() {
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
 
+    // Client-side input validation guard checks
     if (!name || !email || !photoUrl || !password) {
       toast.error("Please provide missing registration parameters.");
       return;
     }
 
-    // Explicit checkpoint validation validation guard loops
     if (
       !validationCheckpoints.hasMinLength ||
       !validationCheckpoints.hasUppercase ||
@@ -133,13 +150,43 @@ export default function SignupPortal() {
     setIsProcessing(true);
 
     try {
-      // Direct pipeline latency index simulation
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      toast.success("Account container established successfully!");
-      router.push("/dashboard");
+      // Parse field inputs securely out of target form elements
+      const formData = new FormData(e.currentTarget);
+      const user = Object.fromEntries(formData.entries());
+
+      // Fire dynamic payload parameters into Better Auth client framework
+      const { data, error } = await authClient.signUp.email({
+        email: user.email,
+        password: user.password,
+        name: user.name,
+        image: user.image,
+      });
+
+      if (data) {
+        toast.success("Account container established successfully! 🎉");
+        router.push("/");
+        router.refresh(); // Forces Next.js to sync middleware auth tokens immediately
+      }
+
+      if (error) {
+        toast.error(error.message || "Failed to establish user credentials.");
+      }
     } catch (err) {
-      toast.error("An infrastructure tracking index exception occurred.");
+      toast.error("An unexpected system infrastructure exception occurred.");
     } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsProcessing(true);
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/", // Redirect fallback destination path post validation loop completion
+      });
+    } catch (err) {
+      toast.error("Google authentication channel communication failure.");
       setIsProcessing(false);
     }
   };
@@ -160,7 +207,7 @@ export default function SignupPortal() {
           </p>
         </div>
 
-        <div className="p-6 rounded-2xl border border-zinc-200 bg-card dark:border-zinc-800 shadow-sm">
+        <div className="p-6 rounded-2xl border border-zinc-200 bg-card dark:border-zinc-800 shadow-sm flex flex-col gap-4">
           <form onSubmit={handleSignupSubmit} className="flex flex-col gap-3.5">
             {/* FULL NAME INPUT FIELD */}
             <div className="flex flex-col gap-1.2">
@@ -173,10 +220,12 @@ export default function SignupPortal() {
                 </div>
                 <Input
                   type="text"
+                  name="name"
                   placeholder="e.g., Alex Rivers"
                   className="h-10 pl-9 border-zinc-200 bg-background text-xs dark:border-zinc-800"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  disabled={isProcessing}
                 />
               </div>
             </div>
@@ -192,10 +241,12 @@ export default function SignupPortal() {
                 </div>
                 <Input
                   type="email"
+                  name="email"
                   placeholder="name@enterprise.com"
                   className="h-10 pl-9 border-zinc-200 bg-background text-xs dark:border-zinc-800"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isProcessing}
                 />
               </div>
             </div>
@@ -211,10 +262,12 @@ export default function SignupPortal() {
                 </div>
                 <Input
                   type="url"
+                  name="image"
                   placeholder="https://images.unsplash.com/.../avatar.jpg"
                   className="h-10 pl-9 border-zinc-200 bg-background text-xs dark:border-zinc-800"
                   value={photoUrl}
                   onChange={(e) => setPhotoUrl(e.target.value)}
+                  disabled={isProcessing}
                 />
               </div>
             </div>
@@ -230,10 +283,12 @@ export default function SignupPortal() {
                 </div>
                 <Input
                   type="password"
+                  name="password"
                   placeholder="••••••••"
                   className="h-10 pl-9 border-zinc-200 bg-background text-xs dark:border-zinc-800"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isProcessing}
                 />
               </div>
 
@@ -312,6 +367,33 @@ export default function SignupPortal() {
               {isProcessing ? "Creating Profile..." : "Register Account"}
             </Button>
           </form>
+
+          {/* VISUAL SEPARATOR */}
+          <div className="relative my-1">
+            <div
+              className="absolute inset-0 flex items-center"
+              aria-hidden="true"
+            >
+              <div className="w-full border-t border-zinc-100 dark:border-zinc-800" />
+            </div>
+            <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest">
+              <span className="bg-card px-2 text-zinc-300 dark:text-zinc-600">
+                Or
+              </span>
+            </div>
+          </div>
+
+          {/* SOCIAL GOOGLE HANDSHAKE */}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleGoogleSignIn}
+            className="w-full h-10 text-xs font-semibold tracking-wide border-zinc-200 bg-background hover:bg-zinc-50 text-zinc-700 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            disabled={isProcessing}
+          >
+            <GoogleIcon />
+            <span>Continue with Google</span>
+          </Button>
         </div>
 
         <div className="text-center text-xs">

@@ -4,6 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { DynamicTitleManager } from "@/components/modules/dynamic-title-manager";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
         className={`${inter.variable} font-sans min-h-screen flex flex-col antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <DynamicTitleManager />
           <Navbar />
           <main className="flex-1 flex flex-col w-full">{children}</main>
           <Footer />

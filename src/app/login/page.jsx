@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client"; // Clean, fixed client instance import
 
 // Clean, single-line vector graphics utilizing custom orange brand mapping
 const LockIcon = () => (
@@ -73,7 +74,7 @@ const GoogleIcon = () => (
     <path
       fill="currentColor"
       d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
-    ></path>
+    />
   </svg>
 );
 
@@ -93,11 +94,28 @@ export default function LoginPortal() {
 
     setIsProcessing(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Identity confirmed. Redirecting to workspace...");
-      router.push("/dashboard");
+      const formData = new FormData(e.currentTarget);
+      const user = Object.fromEntries(formData.entries());
+
+      // Execute standard credential authorization pipeline
+      const { data, error } = await authClient.signIn.email({
+        email: user.email,
+        password: user.password,
+      });
+
+      if (data) {
+        toast.success("Identity confirmed! Redirecting to workspace... 🎉");
+        router.push("/");
+        router.refresh(); // Syncs active route permissions state immediately
+      }
+
+      if (error) {
+        toast.error(
+          error.message || "Authentication rejected. Invalid credentials.",
+        );
+      }
     } catch (err) {
-      toast.error("Authentication rejected. Invalid credentials.");
+      toast.error("An infrastructure tracking index exception occurred.");
     } finally {
       setIsProcessing(false);
     }
@@ -106,12 +124,13 @@ export default function LoginPortal() {
   const handleGoogleSignIn = async () => {
     setIsProcessing(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      toast.success("Google token authorized successfully!");
-      router.push("/dashboard");
+      // Direct user authorization routing to Google authentication microservice
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/", // Redirect fallback land location post authentication completion
+      });
     } catch (err) {
       toast.error("Google authentication channel communication failure.");
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -148,6 +167,7 @@ export default function LoginPortal() {
                 </div>
                 <Input
                   type="email"
+                  name="email"
                   placeholder="name@enterprise.com"
                   className="h-10 pl-9 border-zinc-200 bg-background text-xs dark:border-zinc-800"
                   value={email}
@@ -165,6 +185,7 @@ export default function LoginPortal() {
                 <button
                   type="button"
                   className="text-[10px] text-zinc-400 hover:text-orange-600 transition-colors font-medium"
+                  disabled={isProcessing}
                   onClick={() =>
                     toast.info("Password restoration workflow is UI-only.")
                   }
@@ -178,6 +199,7 @@ export default function LoginPortal() {
                 </div>
                 <Input
                   type="password"
+                  name="password"
                   placeholder="••••••••"
                   className="h-10 pl-9 border-zinc-200 bg-background text-xs dark:border-zinc-800"
                   value={password}
@@ -227,7 +249,7 @@ export default function LoginPortal() {
         <div className="text-center text-xs">
           <span className="text-zinc-400">New to the discovery hub? </span>
           <Link
-            href="/signup"
+            href="/register"
             className="text-orange-600 hover:text-orange-700 dark:text-orange-400 font-bold underline transition-colors"
           >
             Register Account
