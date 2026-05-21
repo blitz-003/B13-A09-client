@@ -57,14 +57,15 @@ export default function Navbar() {
   const isLoggedIn = !!session;
   const currentUser = session?.user;
 
-  // Track operational session switches to sync entry default targets inside modal
-  React.useEffect(() => {
-    if (currentUser && isProfileModalOpen) {
+  // Unified Event Handler to open profile modal and pre-populate inputs safely
+  const openProfileManagement = () => {
+    if (currentUser) {
       setUpdateName(currentUser.name || "");
       setUpdatePassword("");
       setShowPassword(false);
+      setIsProfileModalOpen(true);
     }
-  }, [currentUser, isProfileModalOpen]);
+  };
 
   const handleThemeChange = (nextTheme) => {
     setTheme(nextTheme);
@@ -242,7 +243,7 @@ export default function Navbar() {
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator className="bg-zinc-100 dark:bg-zinc-800" />
                       <DropdownMenuItem
-                        onClick={() => setIsProfileModalOpen(true)}
+                        onClick={openProfileManagement}
                         className="cursor-pointer flex items-center focus:bg-zinc-50 dark:focus:bg-zinc-900"
                       >
                         <User className="mr-2 h-4 w-4 text-zinc-400" />
@@ -348,7 +349,7 @@ export default function Navbar() {
                             className="w-full text-xs font-semibold justify-start"
                             onClick={() => {
                               setIsMobileOpen(false);
-                              setIsProfileModalOpen(true);
+                              openProfileManagement();
                             }}
                           >
                             <User className="mr-2 h-4 w-4 text-zinc-400" />
@@ -377,7 +378,7 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* DETACHED PROFILE UPDATE EDITING VIEWPORT LAYOUT */}
+      {/* PROFILE UPDATE DIALOG MODAL */}
       <Dialog open={isProfileModalOpen} onOpenChange={setIsProfileModalOpen}>
         <DialogContent className="sm:max-w-[400px] border-zinc-200 dark:border-zinc-800 p-6">
           <DialogHeader>
