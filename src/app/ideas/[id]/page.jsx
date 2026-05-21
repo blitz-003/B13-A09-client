@@ -1,22 +1,28 @@
 import IdeaDetailsView from "@/components/modules/IdeaDetailsView";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+
 const IdeaDetailsPage = async ({ params }) => {
   // 1. Await dynamic URL context parameter values safely
   const { id } = await params;
 
-  // 2. Fetch the raw session token via request cookies from Better Auth
+  // 2. Resolve the active session on the server side to get user metadata
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  // 3. Fetch the raw session token via request cookies from Better Auth
   const sessionTokenData = await auth.api.getToken({
     headers: await headers(),
   });
   const token = sessionTokenData?.token;
 
-  // 3. Request data from your remote Express backend using the token
+  // 4. Request data from your remote Express backend using the token
   const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/ideas/${id}`, {
     headers: {
       authorization: token ? `Bearer ${token}` : "",
     },
-    // Optional: Ensures the server fetches fresh data on every route hit
+    // Ensures the server fetches fresh data on every route hit
     cache: "no-store",
   });
 
@@ -31,12 +37,12 @@ const IdeaDetailsPage = async ({ params }) => {
 
   const databaseIdea = await res.json();
 
-  // 4. Drop into the visual rendering block, piping data directly into the Client component
+  // 5. Pipe the live server session states or fallback data cleanly into the Client component
   return (
     <IdeaDetailsView
       fetchedIdea={databaseIdea}
-      currentUserId="usr-99"
-      currentUserName="Elman Pathan"
+      currentUserId={session?.user?.id || null}
+      currentUserName={session?.user?.name || "Anonymous Guest"}
     />
   );
 };

@@ -30,13 +30,10 @@ export default async function DiscoveryHubPage() {
     return (
       <div className="flex flex-col items-center justify-center text-center py-20 text-sm font-medium text-red-500">
         <p>Unable to connect to discovery stream registries.</p>
-        <p className="text-xs text-zinc-400 mt-1">
-          Verify your Express Node server is active.
-        </p>
+        <p className="text-xs text-zinc-400 mt-1">Refresh to reconnect</p>
       </div>
     );
   }
 
-  // 3. Render your client feed smoothly—completely safe from the linter!
   return <DiscoveryFeedClient initialIdeas={liveIdeasFromDb} />;
 }
