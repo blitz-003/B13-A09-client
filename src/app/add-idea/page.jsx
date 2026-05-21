@@ -106,13 +106,13 @@ export default function AddIdeaForm() {
 
       // 2. Fetch the secure JWT token from your auth client
       const { data: tokenData } = await authClient.token();
-
+      
       if (!tokenData?.token) {
         toast.error("Authentication session missing. Please log back in.");
         setIsSubmitting(false);
         return;
       }
-
+      
       // 3. Construct the payload matching your backend's expected req.body keys
       const ideaData = {
         title,
@@ -122,6 +122,7 @@ export default function AddIdeaForm() {
         estimatedBudget: estimatedBudget || "N/A", // Fallback text if optional field is empty
         problem,
         solution,
+        
       };
 
       // 4. Dispatch the actual network request
