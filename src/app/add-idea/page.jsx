@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 // Clean, single-line vector graphics utilizing custom orange brand mapping
 const SparklesIcon = () => (
@@ -84,7 +85,7 @@ export default function AddIdeaForm() {
   const handleFormSubmission = async (e) => {
     e.preventDefault();
 
-    // Field safety validations
+    // 1. Field safety validations
     if (
       !title ||
       !category ||
@@ -100,13 +101,59 @@ export default function AddIdeaForm() {
     setIsSubmitting(true);
 
     try {
-      // Simulating a network lag pipeline talking to a future MongoDB aggregation route
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const BACKEND_URL =
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
 
+      // 2. Fetch the secure JWT token from your auth client
+      const { data: tokenData } = await authClient.token();
+
+      if (!tokenData?.token) {
+        toast.error("Authentication session missing. Please log back in.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 3. Construct the payload matching your backend's expected req.body keys
+      const ideaData = {
+        title,
+        category,
+        shortDescription,
+        targetAudience,
+        estimatedBudget: estimatedBudget || "N/A", // Fallback text if optional field is empty
+        problem,
+        solution,
+      };
+
+      // 4. Dispatch the actual network request
+      const res = await fetch(`${BACKEND_URL}/add-idea`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokenData.token}`, // Send bearer token to pass verifyToken
+        },
+        body: JSON.stringify(ideaData),
+      });
+
+      const responseData = await res.json();
+
+      // 5. Explicitly verify the server's HTTP status response before celebrating
+      if (!res.ok) {
+        throw new Error(
+          responseData.error ||
+            responseData.message ||
+            "Failed to secure database clearance.",
+        );
+      }
+
+      // 6. Execution successful
       toast.success("Concept successfully queued for tracking!");
       router.push("/ideas");
+      router.refresh(); // Clear the route cache to show the fresh list instantly
     } catch (err) {
-      toast.error("An infrastructure error occurred during indexing.");
+      console.error("Submission Pipeline Interruption:", err);
+      toast.error(
+        err.message || "An infrastructure error occurred during indexing.",
+      );
     } finally {
       setIsSubmitting(false);
     }
