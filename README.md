@@ -7,6 +7,7 @@ An interactive, responsive client portal built with Next.js 14+ to crowdsource, 
 - **Concept Portfolio View:** A structured index mapping active ideas, implementation categories, target segments, and cost estimations.
 - **Validation Feedback Stream:** Real-time thread corridor for inline critique with fully integrated, secure CRUD operations for comment entries.
 - **Persistent Authentication:** State management and secure session orchestration handled via `authClient` integration.
+- **Instant UI Suspense Boundaries:** Native global loading framework integration that catches asynchronous server-side data fetching and route transitions with smooth, zero-latency micro-animations.
 - **Adaptive Dark Mode & Responsive Layout:** Crafted using Tailwind CSS, featuring optimized custom SVG asset micro-interactions.
 
 ## 🛠️ Tech Stack
