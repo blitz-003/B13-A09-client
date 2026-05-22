@@ -37,12 +37,13 @@ const IdeaDetailsPage = async ({ params }) => {
 
   const databaseIdea = await res.json();
 
-  // 5. Pipe the live server session states or fallback data cleanly into the Client component
+  // 5. Pipe the live server session states AND the token cleanly into the Client component
   return (
     <IdeaDetailsView
       fetchedIdea={databaseIdea}
       currentUserId={session?.user?.id || null}
       currentUserName={session?.user?.name || "Anonymous Guest"}
+      token={token || null} // <-- Passed token down to client handlers safely
     />
   );
 };

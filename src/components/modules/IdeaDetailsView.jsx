@@ -47,6 +47,7 @@ export default function IdeaDetailsView({
   fetchedIdea,
   currentUserId,
   currentUserName,
+  token, // <-- Caught via component props safely now
 }) {
   // Interactive state anchors for the Feedback Engine
   const [comments, setComments] = React.useState(fetchedIdea?.comments || []);
@@ -92,9 +93,7 @@ export default function IdeaDetailsView({
       const BACKEND_URL =
         process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
 
-      // Fetch your live user credentials token for authClient compatibility
-      const { data: tokenData } = await authClient.token();
-      if (!tokenData?.token) {
+      if (!token) {
         throw new Error("Missing active authorization session framework.");
       }
 
@@ -105,7 +104,7 @@ export default function IdeaDetailsView({
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${tokenData.token}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             text: newCommentText.trim(),
@@ -143,7 +142,6 @@ export default function IdeaDetailsView({
     try {
       const BACKEND_URL =
         process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
-      const { data: tokenData } = await authClient.token();
 
       const res = await fetch(
         `${BACKEND_URL}/ideas/${fetchedIdea._id}/comments/${commentId}`,
@@ -151,7 +149,7 @@ export default function IdeaDetailsView({
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${tokenData.token}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ text: editingText.trim() }),
         },
@@ -178,14 +176,13 @@ export default function IdeaDetailsView({
     try {
       const BACKEND_URL =
         process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
-      const { data: tokenData } = await authClient.token();
 
       const res = await fetch(
         `${BACKEND_URL}/ideas/${fetchedIdea._id}/comments/${commentToDelete.id}`,
         {
           method: "DELETE",
           headers: {
-            Authorization: `Bearer ${tokenData.token}`,
+            Authorization: `Bearer ${token}`,
           },
         },
       );
