@@ -24,6 +24,7 @@ const EditIcon = () => (
     <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
   </svg>
 );
+
 const TrashIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -86,19 +87,46 @@ export default function IdeaDetailsView({
     e.preventDefault();
     if (!newCommentText.trim()) return;
     setIsSubmitting(true);
+
     try {
-      // Optimistic layout push or API stream call here
-      const newComment = {
-        id: Date.now().toString(),
-        userId: currentUserId,
-        userName: currentUserName || "Anonymous Guest",
-        text: newCommentText,
-        timestamp: new Date().toLocaleDateString(),
-      };
-      setComments([newComment, ...comments]);
+      const BACKEND_URL =
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+
+      // Fetch your live user credentials token for authClient compatibility
+      const { data: tokenData } = await authClient.token();
+      if (!tokenData?.token) {
+        throw new Error("Missing active authorization session framework.");
+      }
+
+      // Dispatch the network stream directly to your actual backend route string
+      const res = await fetch(
+        `${BACKEND_URL}/ideas/${fetchedIdea._id}/comments`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${tokenData.token}`,
+          },
+          body: JSON.stringify({
+            text: newCommentText.trim(),
+            userName: currentUserName || "Anonymous Guest",
+          }),
+        },
+      );
+
+      const responseData = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          responseData.error || "Failed to commit comment record.",
+        );
+      }
+
+      // Backend returns { success: true, comment: freshComment }
+      setComments([responseData.comment, ...comments]);
       setNewCommentText("");
     } catch (err) {
-      console.error(err);
+      console.error("Mutation dispatch error:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -112,26 +140,71 @@ export default function IdeaDetailsView({
   const handleSaveEdit = async (commentId) => {
     if (!editingText.trim()) return;
     setIsSubmitting(true);
-    setComments(
-      comments.map((c) =>
-        c.id === commentId ? { ...c, text: editingText } : c,
-      ),
-    );
-    setEditingCommentId(null);
-    setIsSubmitting(false);
+    try {
+      const BACKEND_URL =
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+      const { data: tokenData } = await authClient.token();
+
+      const res = await fetch(
+        `${BACKEND_URL}/ideas/${fetchedIdea._id}/comments/${commentId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${tokenData.token}`,
+          },
+          body: JSON.stringify({ text: editingText.trim() }),
+        },
+      );
+
+      if (res.ok) {
+        setComments(
+          comments.map((c) =>
+            c.id === commentId ? { ...c, text: editingText.trim() } : c,
+          ),
+        );
+        setEditingCommentId(null);
+      }
+    } catch (err) {
+      console.error("Save edit context failure:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleExecuteDelete = async () => {
+    if (!commentToDelete) return;
+    setIsSubmitting(true);
+    try {
+      const BACKEND_URL =
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+      const { data: tokenData } = await authClient.token();
+
+      const res = await fetch(
+        `${BACKEND_URL}/ideas/${fetchedIdea._id}/comments/${commentToDelete.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${tokenData.token}`,
+          },
+        },
+      );
+
+      if (res.ok) {
+        setComments(comments.filter((c) => c.id !== commentToDelete.id));
+        setIsDeleteModalOpen(false);
+        setCommentToDelete(null);
+      }
+    } catch (err) {
+      console.error("Delete routing exception:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const openDeleteModal = (comment) => {
     setCommentToDelete(comment);
     setIsDeleteModalOpen(true);
-  };
-
-  const handleExecuteDelete = () => {
-    setIsSubmitting(true);
-    setComments(comments.filter((c) => c.id !== commentToDelete.id));
-    setIsDeleteModalOpen(false);
-    setCommentToDelete(null);
-    setIsSubmitting(false);
   };
 
   return (
