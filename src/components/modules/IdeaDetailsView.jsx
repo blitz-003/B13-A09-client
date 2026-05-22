@@ -141,7 +141,7 @@ export default function IdeaDetailsView({
         <Link href="/ideas">
           <Button
             variant="ghost"
-            className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 gap-1.5 p-0"
+            className="text-xs font-semibold text-orange-600 hover:text-zinc-900 gap-1.5 p-0"
           >
             ← Back to Feed
           </Button>
@@ -176,7 +176,7 @@ export default function IdeaDetailsView({
       <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-zinc-200/80 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/40 flex items-center justify-center">
         {isImageMissing ? (
           <div className="flex flex-col items-center justify-center gap-2 text-center p-6">
-            <span className="text-3xl">🖼️</span>
+            <span className="text-3xl"></span>
             <p className="text-sm font-semibold text-zinc-400 dark:text-zinc-500">
               No concept cover layout image has been uploaded
             </p>
@@ -227,7 +227,7 @@ export default function IdeaDetailsView({
           {/* PROBLEM VECTOR */}
           <div className="flex flex-col gap-3 p-5 rounded-xl border border-red-100 bg-red-50/10 dark:border-red-950/30 dark:bg-red-950/5">
             <h3 className="text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1.5 tracking-wide uppercase">
-              🚨 The Problem Statement
+              The Problem Statement
             </h3>
             <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed whitespace-pre-wrap">
               {problem}
@@ -237,7 +237,7 @@ export default function IdeaDetailsView({
           {/* MECHANICAL SOLUTION */}
           <div className="flex flex-col gap-3 p-5 rounded-xl border border-emerald-100 bg-emerald-50/10 dark:border-emerald-950/30 dark:bg-emerald-950/5">
             <h3 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 tracking-wide uppercase">
-              ✨ Proposed Core Solution
+              Proposed Core Solution
             </h3>
             <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed whitespace-pre-wrap">
               {solution}
@@ -365,7 +365,7 @@ export default function IdeaDetailsView({
               Estimated Launch Capital
             </span>
             <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50 flex items-center gap-1">
-              <span className="text-orange-500 font-medium">💰</span>{" "}
+              <span className="text-orange-500 font-medium"></span>{" "}
               {estimatedBudget}
             </p>
           </div>
