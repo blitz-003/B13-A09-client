@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 
-// Clean, single-line vector graphics utilizing custom orange brand mapping
+// Icon components utilizing custom orange brand mapping
 const SparklesIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +54,7 @@ const DollarIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
-    viewBox="0 0 24 24"
+    viewpx="0 0 24 24"
     strokeWidth={2}
     stroke="#f97316"
     className="h-5 w-5"
@@ -67,7 +67,14 @@ const DollarIcon = () => (
   </svg>
 );
 
-const CATEGORIES = ["AI & Tech", "Finance", "Healthcare", "Marketing"];
+const CATEGORIES = [
+  "Tech",
+  "Health",
+  "AI",
+  "Education",
+  "Finance",
+  "Marketing",
+];
 
 export default function AddIdeaForm() {
   const router = useRouter();
@@ -75,27 +82,33 @@ export default function AddIdeaForm() {
 
   // Form states tracking
   const [title, setTitle] = React.useState("");
-  const [category, setCategory] = React.useState("");
   const [shortDescription, setShortDescription] = React.useState("");
-  const [targetAudience, setTargetAudience] = React.useState("");
+  const [detailedDescription, setDetailedDescription] = React.useState("");
+  const [category, setCategory] = React.useState("");
+  const [tags, setTags] = React.useState("");
+  const [image, setImage] = React.useState(""); // <-- Track Image URL
   const [estimatedBudget, setEstimatedBudget] = React.useState("");
+  const [targetAudience, setTargetAudience] = React.useState("");
   const [problem, setProblem] = React.useState("");
   const [solution, setSolution] = React.useState("");
-  const [image, setImage] = React.useState(""); // <-- Track Image URL asset string
 
   const handleFormSubmission = async (e) => {
     e.preventDefault();
 
-    // 1. Field safety validations
+    // Verification check including image validation
     if (
-      !title ||
-      !category ||
-      !shortDescription ||
-      !targetAudience ||
-      !problem ||
-      !solution
+      !title.trim() ||
+      !shortDescription.trim() ||
+      !detailedDescription.trim() ||
+      !category.trim() ||
+      !image.trim() || // <-- Image is now strictly required
+      !targetAudience.trim() ||
+      !problem.trim() ||
+      !solution.trim()
     ) {
-      toast.error("Please fill out all required validation modules.");
+      toast.error(
+        "Please populate all compulsory field segments marked with (*).",
+      );
       return;
     }
 
@@ -105,7 +118,6 @@ export default function AddIdeaForm() {
       const BACKEND_URL =
         process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
 
-      // 2. Fetch the secure JWT token from your auth client
       const { data: tokenData } = await authClient.token();
 
       if (!tokenData?.token) {
@@ -114,19 +126,25 @@ export default function AddIdeaForm() {
         return;
       }
 
-      // 3. Construct payload matching your backend expectations
+      // Process string parameters for tags array setup
+      const parsedTags = tags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0);
+
       const ideaData = {
-        title,
+        title: title.trim(),
+        shortDescription: shortDescription.trim(),
+        detailedDescription: detailedDescription.trim(),
         category,
-        shortDescription,
-        targetAudience,
-        estimatedBudget: estimatedBudget || "N/A",
-        problem,
-        solution,
-        image: image.trim(), // <-- Append image variable clean of structural spaces
+        tags: parsedTags,
+        image: image.trim(),
+        estimatedBudget: estimatedBudget.trim() || "N/A", // Optional wrapper handling
+        targetAudience: targetAudience.trim(),
+        problem: problem.trim(),
+        solution: solution.trim(),
       };
 
-      // 4. Dispatch the actual network request
       const res = await fetch(`${BACKEND_URL}/add-idea`, {
         method: "POST",
         headers: {
@@ -138,7 +156,6 @@ export default function AddIdeaForm() {
 
       const responseData = await res.json();
 
-      // 5. Explicitly verify the server's HTTP status response before celebrating
       if (!res.ok) {
         throw new Error(
           responseData.error ||
@@ -147,7 +164,6 @@ export default function AddIdeaForm() {
         );
       }
 
-      // 6. Execution successful
       toast.success("Concept successfully queued for tracking!");
       router.push("/ideas");
       router.refresh();
@@ -163,7 +179,6 @@ export default function AddIdeaForm() {
 
   return (
     <div className="flex-1 w-full max-w-3xl mx-auto px-4 py-8 sm:px-6 flex flex-col gap-8">
-      {/* PAGE TITLES PROFILE */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
           Submit Product Concept
@@ -243,7 +258,7 @@ export default function AddIdeaForm() {
               </span>
             </div>
             <Input
-              placeholder="A one-sentence delivery statement describing the automation value..."
+              placeholder="A one-sentence delivery statement describing the value..."
               className="h-10 border-zinc-200 bg-background dark:border-zinc-800 text-sm"
               value={shortDescription}
               onChange={(e) => setShortDescription(e.target.value)}
@@ -251,23 +266,48 @@ export default function AddIdeaForm() {
             />
           </div>
 
-          {/* --- NEW OPTIONAL IMAGE URL FIELD --- */}
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-1">
-              <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-                Concept Cover Image URL
-              </label>
-              <span className="text-[10px] text-zinc-400 font-medium">
-                (Optional)
-              </span>
-            </div>
-            <Input
-              type="url"
-              placeholder="e.g., https://images.unsplash.com/photo-... or custom storage CDN link"
-              className="h-10 border-zinc-200 bg-background dark:border-zinc-800 text-sm"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+              Detailed Description *
+            </label>
+            <Textarea
+              placeholder="Provide a thorough, exhaustive description mapping structural technical loops..."
+              className="min-h-[140px] border-zinc-200 bg-background dark:border-zinc-800 text-sm"
+              value={detailedDescription}
+              onChange={(e) => setDetailedDescription(e.target.value)}
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-1">
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                  Tags
+                </label>
+                <span className="text-[10px] text-zinc-400 font-medium">
+                  (Optional)
+                </span>
+              </div>
+              <Input
+                placeholder="e.g., saas, open-source, automation (comma-separated)"
+                className="h-10 border-zinc-200 bg-background dark:border-zinc-800 text-sm"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                Concept Cover Image URL *
+              </label>
+              <Input
+                type="url"
+                placeholder="e.g., https://images.unsplash.com/photo-..."
+                className="h-10 border-zinc-200 bg-background dark:border-zinc-800 text-sm"
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
+              />
+            </div>
           </div>
         </div>
 
